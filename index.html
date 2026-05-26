@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>dakebubi26 · AI 学习笔记</title>
+<meta name="description" content="dakebubi26 的 AI 学习笔记 - 从 Prompt 工程到 LLM 应用开发，记录学习路上的折腾、思考与踩坑">
+<meta name="keywords" content="AI, LLM, Prompt, 人工智能, 大语言模型, 学习笔记">
+<meta name="author" content="dakebubi26">
+<meta name="theme-color" content="#0a0e27">
+<!-- Open Graph -->
+<meta property="og:title" content="dakebubi26 · AI 学习笔记">
+<meta property="og:description" content="把 AI 学习变成可分享的成长 - 从 Prompt 工程到 LLM 应用开发">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dakebubi26.me">
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%96%A5%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
@@ -25,9 +36,9 @@
   /* 鼠标提示气泡 */
   #cursor-hint {
     position: fixed;
-    top: 16px; left: 50%;
+    top: 70px; left: 50%;
     transform: translateX(-50%);
-    z-index: 20;
+    z-index: 1001;
     padding: 6px 14px;
     background: rgba(110, 231, 255, 0.1);
     border: 1px solid rgba(110, 231, 255, 0.3);
@@ -46,14 +57,17 @@
     max-width: 980px;
     margin: 0 auto;
     padding: 0 24px;
+    padding-top: 60px;
   }
   /* 导航 */
   nav {
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 10;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     backdrop-filter: blur(12px);
-    background: rgba(10, 14, 39, 0.6);
+    background: rgba(10, 14, 39, 0.85);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
   nav .nav-inner {
@@ -311,6 +325,606 @@
   }
   footer a { color: #6ee7ff; text-decoration: none; }
 
+  /* 搜索框和标签过滤 */
+  .search-container {
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6e9f5;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  .search-box:focus {
+    border-color: rgba(110, 231, 255, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .search-box::placeholder {
+    color: #8a90ad;
+  }
+  .tag-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .tag-filter-btn {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #b4b9d1;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tag-filter-btn:hover, .tag-filter-btn.active {
+    background: rgba(110, 231, 255, 0.15);
+    border-color: rgba(110, 231, 255, 0.3);
+    color: #6ee7ff;
+  }
+
+  /* 项目展示区 */
+  .projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .project-card {
+    padding: 24px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.2s;
+  }
+  .project-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(182, 146, 255, 0.4);
+  }
+  .project-card h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #ffffff;
+  }
+  .project-card p {
+    color: #b4b9d1;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .project-card .tech-stack {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .tech-tag {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    background: rgba(110, 231, 255, 0.1);
+    color: #6ee7ff;
+  }
+  .project-card .links {
+    display: flex;
+    gap: 12px;
+  }
+  .project-card .links a {
+    color: #6ee7ff;
+    text-decoration: none;
+    font-size: 13px;
+  }
+
+  /* 资源库 */
+  .resources {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .resource-item {
+    padding: 18px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.2s;
+  }
+  .resource-item:hover {
+    border-color: rgba(52, 211, 153, 0.4);
+    transform: translateY(-2px);
+  }
+  .resource-item .type {
+    font-size: 12px;
+    color: #34d399;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .resource-item h4 {
+    font-size: 15px;
+    margin-bottom: 6px;
+    color: #ffffff;
+  }
+  .resource-item p {
+    color: #b4b9d1;
+    font-size: 13px;
+  }
+
+  /* Now 页面 */
+  .now-content {
+    max-width: 700px;
+  }
+  .now-content p {
+    color: #b4b9d1;
+    font-size: 15px;
+    margin-bottom: 16px;
+    line-height: 1.8;
+  }
+  .now-content .highlight {
+    color: #6ee7ff;
+    font-weight: 600;
+  }
+
+  /* 友链 */
+  .friends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .friend-card {
+    padding: 18px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .friend-card:hover {
+    border-color: rgba(255, 180, 100, 0.4);
+    transform: translateY(-2px);
+  }
+  .friend-card .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    background: linear-gradient(135deg, #6ee7ff, #b692ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  .friend-card h4 {
+    font-size: 15px;
+    margin-bottom: 6px;
+    color: #ffffff;
+  }
+  .friend-card p {
+    color: #b4b9d1;
+    font-size: 13px;
+  }
+
+  /* 归档和标签云 */
+  .archive-section {
+    margin-bottom: 32px;
+  }
+  .archive-section h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: #ffffff;
+  }
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .tag-cloud-item {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #b4b9d1;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tag-cloud-item:hover {
+    background: rgba(110, 231, 255, 0.15);
+    border-color: rgba(110, 231, 255, 0.3);
+    color: #6ee7ff;
+  }
+  .tag-cloud-item.size-lg {
+    font-size: 16px;
+    padding: 8px 18px;
+  }
+  .tag-cloud-item.size-md {
+    font-size: 14px;
+  }
+  .tag-cloud-item.size-sm {
+    font-size: 12px;
+  }
+
+  /* 评论区 */
+  .comments-section {
+    margin-top: 40px;
+    padding: 24px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .comments-section h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: #ffffff;
+  }
+
+  /* 模态框 */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .modal {
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    background: #0f1322;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h3 {
+    font-size: 18px;
+    color: #ffffff;
+  }
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #b4b9d1;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  /* 文章写作表单 */
+  .write-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .form-group label {
+    font-size: 14px;
+    color: #b4b9d1;
+  }
+  .form-group input, .form-group textarea, .form-group select {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6e9f5;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a90ad' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+  .form-group select option {
+    background: #1a1f3a;
+    color: #e6e9f5;
+    padding: 10px;
+  }
+  .form-group textarea {
+    min-height: 300px;
+    resize: vertical;
+    font-family: "SF Mono", "Fira Code", monospace;
+    line-height: 1.6;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    border-color: rgba(110, 231, 255, 0.5);
+  }
+
+  /* 文章查看器 */
+  .article-content {
+    line-height: 1.8;
+    color: #b4b9d1;
+  }
+  .article-content h1, .article-content h2, .article-content h3 {
+    color: #ffffff;
+    margin: 24px 0 12px;
+  }
+  .article-content p {
+    margin-bottom: 16px;
+  }
+  .article-content code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 14px;
+  }
+  .article-content pre {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+  .article-content pre code {
+    background: none;
+    padding: 0;
+  }
+  .article-content blockquote {
+    border-left: 3px solid #6ee7ff;
+    padding-left: 16px;
+    margin: 16px 0;
+    color: #8a90ad;
+  }
+  .article-content ul, .article-content ol {
+    margin: 16px 0;
+    padding-left: 24px;
+  }
+  .article-content li {
+    margin-bottom: 8px;
+  }
+  .article-content a {
+    color: #6ee7ff;
+    text-decoration: none;
+  }
+  .article-content a:hover {
+    text-decoration: underline;
+  }
+
+  /* 阅读进度条 */
+  #progress-bar {
+    position: fixed;
+    top: 52px;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #6ee7ff, #b692ff);
+    z-index: 1001;
+    transition: width 0.1s;
+  }
+
+  /* 主题切换按钮 */
+  #theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e6e9f5;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  /* 浅色主题 */
+  body.light-theme {
+    background: #f8fafc;
+    color: #1e293b;
+  }
+  body.light-theme #particles {
+    background: radial-gradient(ellipse at top, #e2e8f0 0%, #f8fafc 60%, #f1f5f9 100%);
+  }
+  body.light-theme nav {
+    background: rgba(248, 250, 252, 0.8);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  body.light-theme .post {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  body.light-theme .post:hover {
+    background: rgba(255, 255, 255, 0.95);
+  }
+  body.light-theme .topic {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  body.light-theme h2 {
+    background: linear-gradient(135deg, #1e293b, #475569);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  body.light-theme .section-sub {
+    color: #64748b;
+  }
+  body.light-theme .post h3 {
+    color: #0f172a;
+  }
+  body.light-theme .post p {
+    color: #475569;
+  }
+  body.light-theme .timeline .date {
+    color: #0ea5e9;
+  }
+  body.light-theme .timeline h4 {
+    color: #0f172a;
+  }
+  body.light-theme .timeline p {
+    color: #475569;
+  }
+  body.light-theme .timeline {
+    border-left-color: rgba(14, 165, 233, 0.3);
+  }
+  body.light-theme .timeline .item::before {
+    background: #0ea5e9;
+    box-shadow: 0 0 12px #0ea5e9;
+  }
+  body.light-theme .quote {
+    background: rgba(14, 165, 233, 0.05);
+    border-left-color: #0ea5e9;
+    color: #475569;
+  }
+  body.light-theme footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  body.light-theme .btn-primary {
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+  }
+  body.light-theme .btn-ghost {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: #1e293b;
+    background: rgba(255, 255, 255, 0.5);
+  }
+  body.light-theme .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    #particles {
+      display: none;
+    }
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* 禁止文字选中（粒子区域） */
+  body.no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  body.no-select * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  body.no-select input,
+  body.no-select textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+
+  /* 导航栏滚动状态 */
+  nav.scrolled {
+    background: rgba(10, 14, 39, 0.98);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+  }
+  body.light-theme nav {
+    background: rgba(248, 250, 252, 0.9);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  body.light-theme nav.scrolled {
+    background: rgba(248, 250, 252, 0.98);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  /* 导航链接当前状态 */
+  nav a.nav-active {
+    color: #6ee7ff;
+    position: relative;
+  }
+  nav a.nav-active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6ee7ff, #b692ff);
+    border-radius: 1px;
+  }
+
+  /* 移动端导航优化 */
+  @media (max-width: 768px) {
+    nav .nav-inner {
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    nav ul {
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    nav a {
+      font-size: 13px;
+    }
+  }
+
   .reveal {
     opacity: 0;
     transform: translateY(20px);
@@ -320,6 +934,8 @@
 </style>
 </head>
 <body>
+  <div id="progress-bar"></div>
+  <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
   <canvas id="particles"></canvas>
   <div id="cursor-hint">💡 移动鼠标 · 点击爆炸 · 按住鼠标排斥粒子</div>
 
@@ -328,10 +944,15 @@
       <div class="logo">dakebubi26.me</div>
       <ul>
         <li><a href="#posts">文章</a></li>
-        <li><a href="#topics">主题</a></li>
-        <li><a href="#journey">学习路径</a></li>
+        <li><a href="#projects">项目</a></li>
+        <li><a href="#resources">资源</a></li>
+        <li><a href="#archive">归档</a></li>
+        <li><a href="#friends">友链</a></li>
         <li><a href="#about">关于</a></li>
       </ul>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button class="btn btn-ghost" onclick="openWriteModal()" style="padding: 8px 16px; font-size: 13px;">✏️ 写文章</button>
+      </div>
     </div>
   </nav>
 
@@ -344,13 +965,37 @@
         <a class="btn btn-primary" href="#posts">📖 阅读文章</a>
         <a class="btn btn-ghost" href="https://github.com/dakebubi26" target="_blank" rel="noopener">🐙 GitHub</a>
       </div>
+      <div class="hero-stats" style="margin-top: 40px; display: flex; gap: 32px; justify-content: center;">
+        <div style="text-align: center;">
+          <div style="font-size: 28px; font-weight: 700; color: #6ee7ff;" id="stat-articles">6</div>
+          <div style="font-size: 13px; color: #8a90ad;">已发布文章</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 28px; font-weight: 700; color: #b692ff;" id="stat-days">30</div>
+          <div style="font-size: 13px; color: #8a90ad;">持续更新</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 28px; font-weight: 700; color: #34d399;" id="stat-words">15k</div>
+          <div style="font-size: 13px; color: #8a90ad;">累计字数</div>
+        </div>
+      </div>
     </section>
 
     <section class="block reveal" id="posts">
       <h2>最新文章</h2>
       <p class="section-sub">从学习到分享 · 每一篇都是踩过的坑</p>
-      <div class="posts">
-        <div class="post">
+      <div class="search-container">
+        <input type="text" class="search-box" placeholder="搜索文章..." id="search-input" oninput="filterArticles()">
+        <div class="tag-filter">
+          <button class="tag-filter-btn active" onclick="filterByTag('all')">全部</button>
+          <button class="tag-filter-btn" onclick="filterByTag('prompt')">Prompt</button>
+          <button class="tag-filter-btn" onclick="filterByTag('llm')">LLM</button>
+          <button class="tag-filter-btn" onclick="filterByTag('tool')">工具</button>
+          <button class="tag-filter-btn" onclick="filterByTag('note')">学习笔记</button>
+        </div>
+      </div>
+      <div class="posts" id="posts-container">
+        <div class="post" data-tag="prompt" data-title="Prompt 工程入门：从听懂到写好" onclick="openArticle(0)">
           <div class="meta">
             <span class="tag-pill tag-prompt">Prompt</span>
             <span>2026-05 · 8 min</span>
@@ -359,7 +1004,7 @@
           <p>我学 Prompt 时走过的弯路、有效的几个套路（Few-shot、思维链、角色设定），以及为什么"清晰描述"比"复杂技巧"更重要。</p>
           <div class="read">阅读全文 →</div>
         </div>
-        <div class="post">
+        <div class="post" data-tag="llm" data-title="理解 LLM：从 Token 到上下文窗口" onclick="openArticle(1)">
           <div class="meta">
             <span class="tag-pill tag-llm">LLM</span>
             <span>2026-05 · 12 min</span>
@@ -368,7 +1013,7 @@
           <p>用最朴素的语言解释 Token 是什么、上下文窗口的限制、为什么模型有时会"忘事"，以及它如何影响你的使用方式。</p>
           <div class="read">阅读全文 →</div>
         </div>
-        <div class="post">
+        <div class="post" data-tag="tool" data-title="我的 AI 工具箱（持续更新）" onclick="openArticle(2)">
           <div class="meta">
             <span class="tag-pill tag-tool">工具</span>
             <span>2026-05 · 6 min</span>
@@ -377,7 +1022,7 @@
           <p>日常用的几个 AI 工具组合：Claude 用来写作、ChatGPT 用来查资料、本地小模型用来跑批量任务 —— 各有各的位置。</p>
           <div class="read">阅读全文 →</div>
         </div>
-        <div class="post">
+        <div class="post" data-tag="note" data-title="从零搭建个人技术站" onclick="openArticle(3)">
           <div class="meta">
             <span class="tag-pill tag-note">学习笔记</span>
             <span>2026-05 · 5 min</span>
@@ -386,7 +1031,7 @@
           <p>买域名 → 配 DNS → GitHub Pages → 自定义域名 → HTTPS 全流程，本文也是这次踩坑的产物 😅</p>
           <div class="read">阅读全文 →</div>
         </div>
-        <div class="post">
+        <div class="post" data-tag="llm" data-title="RAG 实战：让 AI 读懂我的笔记" onclick="openArticle(4)">
           <div class="meta">
             <span class="tag-pill tag-llm">LLM</span>
             <span>规划中</span>
@@ -395,7 +1040,7 @@
           <p>用向量数据库 + LLM 搭一个能查自己笔记的小助手，从原理到代码逐步拆解。</p>
           <div class="read">敬请期待 →</div>
         </div>
-        <div class="post">
+        <div class="post" data-tag="prompt" data-title="10 个我每天都在用的 Prompt 模板" onclick="openArticle(5)">
           <div class="meta">
             <span class="tag-pill tag-prompt">Prompt</span>
             <span>规划中</span>
@@ -438,6 +1083,192 @@
       </div>
     </section>
 
+    <section class="block reveal" id="ai-demo">
+      <h2>AI 互动体验</h2>
+      <p class="section-sub">动手试试 AI 的小工具</p>
+      <div style="max-width: 600px; margin: 0 auto;">
+        <div style="padding: 24px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+          <h3 style="font-size: 16px; margin-bottom: 16px; color: #ffffff;">🔤 Token 计数器</h3>
+          <p style="color: #b4b9d1; font-size: 14px; margin-bottom: 16px;">输入文本，查看大约的 Token 数量（英文约 1 token ≈ 4 字符，中文约 1 token ≈ 1.5 字符）</p>
+          <textarea id="token-input" placeholder="在这里输入文本..." style="width: 100%; min-height: 100px; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #e6e9f5; font-size: 14px; resize: vertical; outline: none; font-family: inherit;" oninput="countTokens()"></textarea>
+          <div style="margin-top: 12px; display: flex; gap: 20px;">
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: 700; color: #6ee7ff;" id="token-count">0</div>
+              <div style="font-size: 12px; color: #8a90ad;">Tokens</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: 700; color: #b692ff;" id="char-count">0</div>
+              <div style="font-size: 12px; color: #8a90ad;">字符数</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: 700; color: #34d399;" id="word-count">0</div>
+              <div style="font-size: 12px; color: #8a90ad;">词数</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block reveal" id="projects">
+      <h2>项目展示</h2>
+      <p class="section-sub">动手实践的小项目</p>
+      <div class="projects">
+        <div class="project-card">
+          <h3>📚 个人知识库助手</h3>
+          <p>基于 RAG 的智能问答系统，可以查询自己的笔记和文档。</p>
+          <div class="tech-stack">
+            <span class="tech-tag">Python</span>
+            <span class="tech-tag">LangChain</span>
+            <span class="tech-tag">ChromaDB</span>
+          </div>
+          <div class="links">
+            <a href="#" target="_blank">GitHub</a>
+            <a href="#" target="_blank">演示</a>
+          </div>
+        </div>
+        <div class="project-card">
+          <h3>🤖 自动化写作助手</h3>
+          <p>输入大纲，自动生成文章初稿，支持多种风格切换。</p>
+          <div class="tech-stack">
+            <span class="tech-tag">Claude API</span>
+            <span class="tech-tag">Node.js</span>
+            <span class="tech-tag">React</span>
+          </div>
+          <div class="links">
+            <a href="#" target="_blank">GitHub</a>
+            <a href="#" target="_blank">演示</a>
+          </div>
+        </div>
+        <div class="project-card">
+          <h3>📊 学习数据追踪</h3>
+          <p>记录每日学习时长、主题分布，生成可视化报告。</p>
+          <div class="tech-stack">
+            <span class="tech-tag">JavaScript</span>
+            <span class="tech-tag">Chart.js</span>
+            <span class="tech-tag">LocalStorage</span>
+          </div>
+          <div class="links">
+            <a href="#" target="_blank">GitHub</a>
+            <a href="#" target="_blank">演示</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block reveal" id="resources">
+      <h2>资源库</h2>
+      <p class="section-sub">精选的学习资源</p>
+      <div class="resources">
+        <div class="resource-item">
+          <div class="type">论文</div>
+          <h4>Attention Is All You Need</h4>
+          <p>Transformer 架构的开山之作，理解现代 LLM 的必读论文。</p>
+        </div>
+        <div class="resource-item">
+          <div class="type">课程</div>
+          <h4>CS229: Machine Learning</h4>
+          <p>斯坦福经典机器学习课程，打基础的好选择。</p>
+        </div>
+        <div class="resource-item">
+          <div class="type">工具</div>
+          <h4>Hugging Face</h4>
+          <p>最大的开源 AI 模型社区，模型、数据集、教程一应俱全。</p>
+        </div>
+        <div class="resource-item">
+          <div class="type">博客</div>
+          <h4>Lilian Weng's Blog</h4>
+          <p>OpenAI 研究员的博客，技术深度和可读性兼具。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block reveal" id="now">
+      <h2>Now</h2>
+      <p class="section-sub">我最近在做什么</p>
+      <div class="now-content">
+        <p><span class="highlight">最近</span>：正在深入学习 RAG（检索增强生成）技术，尝试搭建自己的知识库问答系统。</p>
+        <p><span class="highlight">关注</span>：Agent 架构、多模态模型、AI 安全与对齐。</p>
+        <p><span class="highlight">目标</span>：完成 3 个完整的 AI 项目，输出 10 篇高质量技术文章。</p>
+        <p><span class="highlight">状态</span>：每天保持 2 小时学习时间，周末集中实践项目。</p>
+      </div>
+    </section>
+
+    <section class="block reveal" id="friends">
+      <h2>友链</h2>
+      <p class="section-sub">一起学习的小伙伴们</p>
+      <div class="friends-grid">
+        <div class="friend-card">
+          <div class="avatar">🤖</div>
+          <h4>AI 探索者</h4>
+          <p>专注于 AI 应用实践</p>
+        </div>
+        <div class="friend-card">
+          <div class="avatar">💻</div>
+          <h4>代码艺术家</h4>
+          <p>全栈开发与开源爱好者</p>
+        </div>
+        <div class="friend-card">
+          <div class="avatar">📖</div>
+          <h4>学习笔记簿</h4>
+          <p>记录技术学习点滴</p>
+        </div>
+        <div class="friend-card">
+          <div class="avatar">🚀</div>
+          <h4>创新工坊</h4>
+          <p>AI 创业与产品思考</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block reveal" id="archive">
+      <h2>归档</h2>
+      <p class="section-sub">按时间线浏览</p>
+      <div class="archive-section">
+        <h3>标签云</h3>
+        <div class="tag-cloud">
+          <span class="tag-cloud-item size-lg">Prompt</span>
+          <span class="tag-cloud-item size-md">LLM</span>
+          <span class="tag-cloud-item size-sm">工具</span>
+          <span class="tag-cloud-item size-md">学习笔记</span>
+          <span class="tag-cloud-item size-sm">RAG</span>
+          <span class="tag-cloud-item size-lg">AI</span>
+          <span class="tag-cloud-item size-md">Python</span>
+          <span class="tag-cloud-item size-sm">API</span>
+        </div>
+      </div>
+      <div class="archive-section">
+        <h3>2026 年 5 月</h3>
+        <div style="border-left: 2px solid rgba(110,231,255,0.3); padding-left: 16px;">
+          <div style="margin-bottom: 12px;">
+            <span style="color: #6ee7ff; font-size: 13px;">05-25</span>
+            <a href="#" style="color: #e6e9f5; text-decoration: none; margin-left: 12px;">Prompt 工程入门：从听懂到写好</a>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <span style="color: #6ee7ff; font-size: 13px;">05-20</span>
+            <a href="#" style="color: #e6e9f5; text-decoration: none; margin-left: 12px;">理解 LLM：从 Token 到上下文窗口</a>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <span style="color: #6ee7ff; font-size: 13px;">05-15</span>
+            <a href="#" style="color: #e6e9f5; text-decoration: none; margin-left: 12px;">我的 AI 工具箱（持续更新）</a>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <span style="color: #6ee7ff; font-size: 13px;">05-10</span>
+            <a href="#" style="color: #e6e9f5; text-decoration: none; margin-left: 12px;">从零搭建个人技术站</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block reveal" id="comments">
+      <h2>评论区</h2>
+      <p class="section-sub">欢迎交流讨论</p>
+      <div class="comments-section">
+        <p style="color: #8a90ad; font-size: 14px;">评论系统正在接入中，敬请期待...</p>
+        <!-- Giscus 评论系统占位 -->
+        <div id="giscus-container" style="margin-top: 16px;"></div>
+      </div>
+    </section>
+
     <section class="block reveal" id="journey">
       <h2>我的学习路径</h2>
       <p class="section-sub">真实记录 · 慢慢来比较快</p>
@@ -474,10 +1305,17 @@
       <p style="color:#b4b9d1; max-width: 720px; margin-bottom: 24px;">
         我是 dakebubi26，AI 领域的学习者与折腾者。这个博客是我学习过程的"副产品" —— 把读过的、试过的、踩过的，整理成别人也能读懂的文字。如果你也在这条路上，欢迎一起交流。
       </p>
-      <div class="cta" style="justify-content:flex-start;">
+      <div class="cta" style="justify-content:flex-start; flex-wrap: wrap; gap: 12px;">
         <a class="btn btn-primary" href="mailto:hi@dakebubi26.me">📧 给我写信</a>
         <a class="btn btn-ghost" href="https://github.com/dakebubi26" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn btn-ghost" href="https://twitter.com/dakebubi26" target="_blank" rel="noopener">Twitter</a>
+        <a class="btn btn-ghost" href="https://www.zhihu.com/people/dakebubi26" target="_blank" rel="noopener">知乎</a>
+        <a class="btn btn-ghost" href="https://space.bilibili.com/dakebubi26" target="_blank" rel="noopener">B站</a>
         <a class="btn btn-ghost" href="#posts">订阅更新</a>
+      </div>
+      <div style="margin-top: 32px; padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); max-width: 400px;">
+        <p style="color: #b4b9d1; font-size: 14px; margin-bottom: 12px;">如果觉得内容有帮助，可以请我喝杯咖啡 ☕</p>
+        <a class="btn btn-primary" href="https://www.buymeacoffee.com/dakebubi26" target="_blank" rel="noopener" style="width: 100%; justify-content: center;">Buy Me a Coffee</a>
       </div>
     </section>
   </div>
@@ -485,6 +1323,60 @@
   <footer>
     Made with <span style="color:#ff6b9d;">♥</span> by dakebubi26 · 持续学习，持续分享 · <span id="year"></span>
   </footer>
+
+  <!-- 写文章模态框 -->
+  <div class="modal-overlay" id="write-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>✏️ 写文章</h3>
+        <button class="modal-close" onclick="closeWriteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="write-form">
+          <div class="form-group">
+            <label>标题</label>
+            <input type="text" id="article-title" placeholder="文章标题">
+          </div>
+          <div class="form-group">
+            <label>标签</label>
+            <select id="article-tag">
+              <option value="prompt">Prompt</option>
+              <option value="llm">LLM</option>
+              <option value="tool">工具</option>
+              <option value="note">学习笔记</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>内容（支持 Markdown）</label>
+            <textarea id="article-content" placeholder="在这里写文章内容...&#10;&#10;支持 Markdown 语法：&#10;# 标题&#10;**粗体** *斜体*&#10;- 列表&#10;```代码块```"></textarea>
+          </div>
+          <div style="font-size: 12px; color: #8a90ad;">
+            提示：文章将保存到浏览器本地存储，刷新页面后仍可查看。
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeWriteModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveArticle()">保存文章</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 文章查看器模态框 -->
+  <div class="modal-overlay" id="article-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="article-modal-title">文章标题</h3>
+        <button class="modal-close" onclick="closeArticleModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="article-content" id="article-modal-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeArticleModal()">关闭</button>
+      </div>
+    </div>
+  </div>
 
 <script>
 /* ===== 增强版粒子系统 ===== */
@@ -665,8 +1557,17 @@
   window.addEventListener('resize', () => { resize(); init(); });
   window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
   window.addEventListener('mouseout', () => { mouse.x = -9999; mouse.y = -9999; });
-  window.addEventListener('mousedown', e => { mouse.down = true; burstAt(e.clientX, e.clientY); });
-  window.addEventListener('mouseup',   () => { mouse.down = false; });
+  window.addEventListener('mousedown', e => {
+    mouse.down = true;
+    burstAt(e.clientX, e.clientY);
+    // 鼠标按下时禁止选中文字
+    document.body.classList.add('no-select');
+  });
+  window.addEventListener('mouseup', () => {
+    mouse.down = false;
+    // 鼠标松开后恢复文字选中
+    document.body.classList.remove('no-select');
+  });
   // 触屏
   window.addEventListener('touchstart', e => {
     if (e.touches[0]) {
@@ -674,21 +1575,25 @@
       mouse.y = e.touches[0].clientY;
       mouse.down = true;
       burstAt(mouse.x, mouse.y);
+      document.body.classList.add('no-select');
     }
   }, { passive: true });
   window.addEventListener('touchmove', e => {
     if (e.touches[0]) { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }
   }, { passive: true });
-  window.addEventListener('touchend', () => { mouse.down = false; });
+  window.addEventListener('touchend', () => {
+    mouse.down = false;
+    document.body.classList.remove('no-select');
+  });
 
   resize();
   init();
   step();
 
-  // 进入时显示提示
+  // 进入时显示提示（1秒）
   const hint = document.getElementById('cursor-hint');
-  setTimeout(() => hint.classList.add('show'), 800);
-  setTimeout(() => hint.classList.remove('show'), 5500);
+  setTimeout(() => hint.classList.add('show'), 300);
+  setTimeout(() => hint.classList.remove('show'), 1300);
 })();
 
 /* ===== 滚动出现动画 ===== */
@@ -698,6 +1603,722 @@ const io = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
 document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ===== 阅读进度条 ===== */
+window.addEventListener('scroll', () => {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const progress = (scrollTop / scrollHeight) * 100;
+  document.getElementById('progress-bar').style.width = progress + '%';
+
+  // 导航栏滚动状态
+  const nav = document.querySelector('nav');
+  if (scrollTop > 50) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
+});
+
+/* ===== 导航链接当前状态 ===== */
+function updateActiveNav() {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+  let currentSection = '';
+
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop - 100;
+    if (window.scrollY >= sectionTop) {
+      currentSection = section.getAttribute('id');
+    }
+  });
+
+  navLinks.forEach(link => {
+    link.classList.remove('nav-active');
+    if (link.getAttribute('href') === '#' + currentSection) {
+      link.classList.add('nav-active');
+    }
+  });
+}
+
+window.addEventListener('scroll', updateActiveNav);
+
+/* ===== 主题切换 ===== */
+function toggleTheme() {
+  document.body.classList.toggle('light-theme');
+  const btn = document.getElementById('theme-toggle');
+  btn.textContent = document.body.classList.contains('light-theme') ? '☀️' : '🌙';
+  localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+}
+
+// 检查本地存储的主题偏好
+if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light-theme');
+  document.getElementById('theme-toggle').textContent = '☀️';
+}
+
+/* ===== 文章数据 ===== */
+const articles = [
+  {
+    id: 0,
+    title: 'Prompt 工程入门：从听懂到写好',
+    tag: 'prompt',
+    content: `# Prompt 工程入门：从听懂到写好
+
+## 前言
+
+刚开始用 AI 的时候，我以为 Prompt 就是"跟 AI 说话"。后来发现，这门学问远比我想象的深。
+
+## 我踩过的坑
+
+1. **太模糊**："帮我写篇文章" → AI 给出泛泛而谈的内容
+2. **太复杂**：堆砌一堆限制条件 → AI 反而不知道该做什么
+3. **没有上下文**：直接问专业问题 → AI 给出通用答案
+
+## 有效的套路
+
+### Few-shot（给例子）
+\`\`\`
+请按以下格式回答：
+问题：什么是机器学习？
+回答：机器学习是让计算机从数据中学习规律，而不需要显式编程的技术。
+
+问题：什么是深度学习？
+回答：
+\`\`\`
+
+### 思维链（Chain of Thought）
+\`\`\`
+请一步步思考：
+1. 首先分析问题的关键点
+2. 然后列出可能的解决方案
+3. 最后给出推荐方案
+\`\`\`
+
+### 角色设定
+\`\`\`
+你是一位资深的 AI 工程师，请用通俗易懂的语言解释...
+\`\`\`
+
+## 核心原则
+
+**清晰描述 > 复杂技巧**
+
+与其记住一堆 Prompt 模板，不如学会清晰地表达你的需求。
+
+## 结语
+
+Prompt 工程的本质是"有效沟通"。把 AI 当作一个聪明但需要明确指令的助手，你会得到更好的结果。`
+  },
+  {
+    id: 1,
+    title: '理解 LLM：从 Token 到上下文窗口',
+    tag: 'llm',
+    content: `# 理解 LLM：从 Token 到上下文窗口
+
+## 什么是 Token？
+
+Token 不是字，也不是词，而是模型处理文本的基本单位。
+
+- 英文：约 1 token ≈ 4 个字符（"hello" ≈ 1 token）
+- 中文：约 1 token ≈ 1.5 个字符（"你好" ≈ 1-2 tokens）
+
+## 上下文窗口
+
+每个模型都有"记忆限制"，这就是上下文窗口。
+
+\`\`\`
+GPT-4: 8K / 32K / 128K tokens
+Claude: 200K tokens
+\`\`\`
+
+**为什么这很重要？**
+- 超出窗口的内容，模型"看不见"
+- 这就是为什么长对话会"忘记"前面的内容
+
+## Token 与成本
+
+API 按 Token 计费：
+- 输入 tokens：你发送的内容
+- 输出 tokens：模型生成的内容
+
+\`\`\`python
+# 简单的 token 计数
+text = "你好世界"
+# 大约 2-4 个 tokens
+\`\`\`
+
+## 实用建议
+
+1. **精简输入**：去除不必要的内容
+2. **分段处理**：长文档分块处理
+3. **注意窗口**：重要信息放在前面或后面
+
+## 结语
+
+理解 Token 和上下文窗口，能帮你更高效地使用 AI，也能解释很多"奇怪"的行为。`
+  },
+  {
+    id: 2,
+    title: '我的 AI 工具箱（持续更新）',
+    tag: 'tool',
+    content: `# 我的 AI 工具箱（持续更新）
+
+## 写作类
+
+### Claude
+- **用途**：长文写作、深度分析
+- **优势**：理解能力强，输出质量高
+- **场景**：技术博客、报告撰写
+
+### ChatGPT
+- **用途**：快速问答、代码调试
+- **优势**：响应快，插件丰富
+- **场景**：日常查询、简单任务
+
+## 开发类
+
+### Cursor
+- **用途**：AI 辅助编程
+- **优势**：深度集成 IDE
+- **场景**：代码补全、重构建议
+
+### GitHub Copilot
+- **用途**：代码生成
+- **优势**：上下文理解好
+- **场景**：函数实现、测试生成
+
+## 学习类
+
+### Readwise Reader
+- **用途**：阅读和标注
+- **优势**：AI 总结功能
+- **场景**：论文阅读、文章收藏
+
+## 效率类
+
+### Notion AI
+- **用途**：笔记整理
+- **优势**：与笔记深度集成
+- **场景**：会议记录、知识管理
+
+## 工具组合心得
+
+- **写作流程**：Claude 起草 → 人工润色 → ChatGPT 检查
+- **学习流程**：Readwise 收集 → Notion 整理 → 博客输出
+- **开发流程**：Copilot 补全 → Cursor 重构 → 人工审查
+
+## 持续更新
+
+这个工具箱会随着我的学习不断更新。如果你有好的推荐，欢迎告诉我！`
+  },
+  {
+    id: 3,
+    title: '从零搭建个人技术站',
+    tag: 'note',
+    content: `# 从零搭建个人技术站
+
+## 为什么要做个人博客？
+
+1. **输出倒逼输入**：写出来才能真正理解
+2. **建立个人品牌**：技术圈的"名片"
+3. **记录成长轨迹**：以后回看会很有趣
+
+## 技术选型
+
+### 方案对比
+
+| 方案 | 优点 | 缺点 |
+|------|------|------|
+| Hexo | 简单，生态好 | 定制性一般 |
+| Hugo | 速度快 | 主题少 |
+| Next.js | 灵活，功能强 | 学习成本高 |
+| **GitHub Pages** | 免费，稳定 | 需要自己优化 |
+
+我选择了 **GitHub Pages + 自定义 HTML**，因为：
+- 完全控制样式
+- 学习前端知识
+- 免费托管
+
+## 搭建步骤
+
+### 1. 购买域名
+\`\`\`
+推荐：Namecheap、Cloudflare
+价格：约 $10/年
+\`\`\`
+
+### 2. 配置 DNS
+\`\`\`
+添加 A 记录指向 GitHub Pages IP：
+185.199.108.153
+185.199.109.153
+185.199.110.153
+185.199.111.153
+\`\`\`
+
+### 3. GitHub Pages 设置
+- 仓库名：\`username.github.io\`
+- 启用 HTTPS
+- 添加自定义域名
+
+### 4. 自定义样式
+这就是你现在看到的这个网站！
+
+## 踩坑记录
+
+1. **DNS 生效时间**：最长可能需要 48 小时
+2. **HTTPS 证书**：GitHub 自动提供，但需要等待
+3. **CDN 缓存**：修改后可能需要清除缓存
+
+## 结语
+
+搭建个人博客不只是技术活，更是一种学习态度。希望这篇文章能帮到你！`
+  },
+  {
+    id: 4,
+    title: 'RAG 实战：让 AI 读懂我的笔记',
+    tag: 'llm',
+    content: `# RAG 实战：让 AI 读懂我的笔记
+
+## 什么是 RAG？
+
+RAG（Retrieval-Augmented Generation）= 检索 + 生成
+
+\`\`\`
+传统 LLM：问题 → 模型 → 答案（基于训练数据）
+RAG：问题 → 检索相关文档 → 问题+文档 → 模型 → 答案（基于你的数据）
+\`\`\`
+
+## 为什么需要 RAG？
+
+1. **知识时效性**：模型训练数据有截止日期
+2. **私有数据**：你的笔记、文档不在公开数据中
+3. **准确性**：减少"幻觉"，基于事实回答
+
+## 技术架构
+
+\`\`\`
+用户问题
+    ↓
+向量化（Embedding）
+    ↓
+向量数据库检索
+    ↓
+Top-K 相关文档
+    ↓
+构建 Prompt
+    ↓
+LLM 生成答案
+\`\`\`
+
+## 代码示例
+
+\`\`\`python
+from langchain.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+
+# 1. 加载文档
+loader = TextLoader('my_notes.txt')
+documents = loader.load()
+
+# 2. 分割文本
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=50
+)
+chunks = splitter.split_documents(documents)
+
+# 3. 创建向量数据库
+embeddings = OpenAIEmbeddings()
+vectorstore = Chroma.from_documents(chunks, embeddings)
+
+# 4. 检索和问答
+query = "什么是 RAG？"
+docs = vectorstore.similarity_search(query, k=3)
+\`\`\`
+
+## 实际效果
+
+输入："RAG 的优势是什么？"
+输出：基于我的笔记，RAG 的优势包括...
+- 能处理私有数据
+- 减少幻觉
+- 知识可更新
+
+## 下一步计划
+
+1. 支持更多文档格式（PDF、Markdown）
+2. 优化检索策略
+3. 添加对话历史
+
+## 结语
+
+RAG 是让 AI 真正"懂你"的关键技术。动手试试，你会发现它的强大！`
+  },
+  {
+    id: 5,
+    title: '10 个我每天都在用的 Prompt 模板',
+    tag: 'prompt',
+    content: `# 10 个我每天都在用的 Prompt 模板
+
+## 1. 翻译助手
+
+\`\`\`
+请将以下内容翻译成[目标语言]，要求：
+1. 准确传达原意
+2. 符合目标语言的表达习惯
+3. 保持专业术语的一致性
+
+内容：[待翻译文本]
+\`\`\`
+
+## 2. 文章润色
+
+\`\`\`
+请帮我润色以下文章，要求：
+1. 保持原意不变
+2. 优化语言表达
+3. 增强可读性
+4. 检查语法错误
+
+文章：[文章内容]
+\`\`\`
+
+## 3. 代码 Review
+
+\`\`\`
+请 review 以下代码，关注：
+1. 代码质量和可读性
+2. 潜在的 bug
+3. 性能问题
+4. 安全风险
+5. 改进建议
+
+代码：[代码内容]
+\`\`\`
+
+## 4. 会议总结
+
+\`\`\`
+请根据以下会议记录生成总结：
+1. 关键讨论点
+2. 做出的决定
+3. 待办事项
+4. 下一步行动
+
+会议记录：[记录内容]
+\`\`\`
+
+## 5. 学习计划
+
+\`\`\`
+请为我制定一个学习[主题]的计划：
+1. 前置知识要求
+2. 学习路线图
+3. 推荐资源
+4. 时间安排
+5. 实践项目
+
+我的背景：[你的背景]
+目标：[学习目标]
+\`\`\`
+
+## 6. 问题分析
+
+\`\`\`
+请帮我分析以下问题：
+1. 问题的本质是什么？
+2. 可能的原因有哪些？
+3. 解决方案有哪些？
+4. 推荐方案及理由
+
+问题描述：[问题内容]
+\`\`\`
+
+## 7. 概念解释
+
+\`\`\`
+请用简单的语言解释[概念]：
+1. 是什么
+2. 为什么重要
+3. 实际应用场景
+4. 与相关概念的区别
+
+要求：让非专业人士也能理解
+\`\`\`
+
+## 8. 头脑风暴
+
+\`\`\`
+关于[主题]，请帮我想出 10 个创意点子：
+1. 每个点子用一句话描述
+2. 说明其独特之处
+3. 评估可行性（1-5分）
+
+主题：[主题内容]
+\`\`\`
+
+## 9. 文档生成
+
+\`\`\`
+请为以下代码/功能生成文档：
+1. 功能说明
+2. 使用方法
+3. 参数说明
+4. 示例代码
+5. 注意事项
+
+代码/功能：[内容]
+\`\`\`
+
+## 10. 学习笔记
+
+\`\`\`
+请帮我整理以下内容的学习笔记：
+1. 核心概念
+2. 关键要点
+3. 常见误区
+4. 实践建议
+5. 延伸阅读
+
+内容：[学习内容]
+\`\`\`
+
+## 使用技巧
+
+1. **根据需求调整**：这些模板是起点，根据具体情况修改
+2. **迭代优化**：第一次结果不满意？添加更多细节或限制
+3. **组合使用**：可以把多个模板结合使用
+
+## 结语
+
+好的 Prompt 是高效使用 AI 的关键。希望这些模板能帮到你！`
+  }
+];
+
+/* ===== 文章搜索和过滤 ===== */
+function filterArticles() {
+  const searchTerm = document.getElementById('search-input').value.toLowerCase();
+  const posts = document.querySelectorAll('#posts-container .post');
+
+  posts.forEach(post => {
+    const title = post.getAttribute('data-title').toLowerCase();
+    const tag = post.getAttribute('data-tag');
+    const activeTag = document.querySelector('.tag-filter-btn.active').getAttribute('onclick').match(/'([^']+)'/)[1];
+
+    const matchesSearch = title.includes(searchTerm);
+    const matchesTag = activeTag === 'all' || tag === activeTag;
+
+    post.style.display = matchesSearch && matchesTag ? 'flex' : 'none';
+  });
+}
+
+function filterByTag(tag) {
+  // 更新按钮状态
+  document.querySelectorAll('.tag-filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+
+  filterArticles();
+}
+
+/* ===== Token 计数器 ===== */
+function countTokens() {
+  const text = document.getElementById('token-input').value;
+
+  // 简单的 token 估算
+  const englishChars = text.replace(/[^a-zA-Z0-9]/g, '').length;
+  const chineseChars = text.replace(/[^一-龥]/g, '').length;
+  const otherChars = text.length - englishChars - chineseChars;
+
+  const tokens = Math.ceil(englishChars / 4) + Math.ceil(chineseChars / 1.5) + otherChars;
+  const chars = text.length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+
+  document.getElementById('token-count').textContent = tokens;
+  document.getElementById('char-count').textContent = chars;
+  document.getElementById('word-count').textContent = words;
+}
+
+/* ===== 文章查看器 ===== */
+function openArticle(id) {
+  const article = articles.find(a => a.id === id);
+  if (!article) return;
+
+  document.getElementById('article-modal-title').textContent = article.title;
+  document.getElementById('article-modal-content').innerHTML = parseMarkdown(article.content);
+  document.getElementById('article-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeArticleModal() {
+  document.getElementById('article-modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ===== 写文章模态框 ===== */
+function openWriteModal() {
+  document.getElementById('write-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWriteModal() {
+  document.getElementById('write-modal').classList.remove('active');
+  document.body.style.overflow = '';
+  // 清空表单
+  document.getElementById('article-title').value = '';
+  document.getElementById('article-content').value = '';
+}
+
+function saveArticle() {
+  const title = document.getElementById('article-title').value.trim();
+  const tag = document.getElementById('article-tag').value;
+  const content = document.getElementById('article-content').value.trim();
+
+  if (!title || !content) {
+    alert('请填写标题和内容');
+    return;
+  }
+
+  // 从 localStorage 加载现有文章
+  let savedArticles = JSON.parse(localStorage.getItem('customArticles') || '[]');
+
+  // 创建新文章
+  const newArticle = {
+    id: Date.now(),
+    title: title,
+    tag: tag,
+    content: content,
+    date: new Date().toISOString().split('T')[0]
+  };
+
+  savedArticles.push(newArticle);
+  localStorage.setItem('customArticles', JSON.stringify(savedArticles));
+
+  // 添加到页面
+  addArticleToPage(newArticle);
+
+  closeWriteModal();
+  alert('文章保存成功！');
+}
+
+function addArticleToPage(article) {
+  const container = document.getElementById('posts-container');
+  const tagClass = 'tag-' + article.tag;
+  const tagNames = {
+    'prompt': 'Prompt',
+    'llm': 'LLM',
+    'tool': '工具',
+    'note': '学习笔记'
+  };
+
+  const postHTML = `
+    <div class="post" data-tag="${article.tag}" data-title="${article.title}" onclick="openArticle(${article.id})">
+      <div class="meta">
+        <span class="tag-pill ${tagClass}">${tagNames[article.tag]}</span>
+        <span>${article.date} · 自定义</span>
+      </div>
+      <h3>${article.title}</h3>
+      <p>${article.content.substring(0, 100)}...</p>
+      <div class="read">阅读全文 →</div>
+    </div>
+  `;
+
+  container.insertAdjacentHTML('afterbegin', postHTML);
+
+  // 添加到文章数组
+  articles.unshift({
+    id: article.id,
+    title: article.title,
+    tag: article.tag,
+    content: article.content
+  });
+}
+
+/* ===== 简易 Markdown 解析器 ===== */
+function parseMarkdown(md) {
+  let html = md;
+
+  // 标题
+  html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+
+  // 粗体和斜体
+  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+  // 代码块
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+
+  // 行内代码
+  html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+
+  // 引用
+  html = html.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+
+  // 列表
+  html = html.replace(/^\- (.*$)/gm, '<li>$1</li>');
+  html = html.replace(/^(\d+)\. (.*$)/gm, '<li>$2</li>');
+
+  // 表格（简单处理）
+  html = html.replace(/\|(.+)\|/g, (match) => {
+    const cells = match.split('|').filter(cell => cell.trim());
+    if (cells.some(cell => cell.includes('---'))) return '';
+    return '<tr>' + cells.map(cell => `<td>${cell.trim()}</td>`).join('') + '</tr>';
+  });
+
+  // 段落
+  html = html.replace(/\n\n/g, '</p><p>');
+  html = '<p>' + html + '</p>';
+
+  // 清理空段落
+  html = html.replace(/<p><\/p>/g, '');
+  html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+  html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+  html = html.replace(/<p>(<pre>)/g, '$1');
+  html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+  html = html.replace(/<p>(<blockquote>)/g, '$1');
+  html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
+  html = html.replace(/<p>(<li>)/g, '<ul>$1');
+  html = html.replace(/(<\/li>)<\/p>/g, '$1</ul>');
+
+  return html;
+}
+
+/* ===== 加载保存的文章 ===== */
+function loadSavedArticles() {
+  const savedArticles = JSON.parse(localStorage.getItem('customArticles') || '[]');
+  savedArticles.forEach(article => addArticleToPage(article));
+}
+
+// 页面加载时执行
+document.addEventListener('DOMContentLoaded', loadSavedArticles);
+
+// 点击模态框外部关闭
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
+});
+
+// ESC 键关闭模态框
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+      modal.classList.remove('active');
+    });
+    document.body.style.overflow = '';
+  }
+});
 </script>
 </body>
 </html>
