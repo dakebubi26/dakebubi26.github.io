@@ -1,21 +1,487 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dakebubi26 的个人主页</title>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #1a73e8; }
-        .lock { color: #34a853; font-size: 24px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dakebubi26 的个人主页</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0a0e27;
+    color: #e6e9f5;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  /* 粒子画布 */
+  #particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(ellipse at top, #1a1f4a 0%, #0a0e27 60%, #050818 100%);
+  }
+  /* 内容层 */
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  /* 导航 */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(12px);
+    background: rgba(10, 14, 39, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  nav .nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  nav .logo {
+    font-weight: 700;
+    font-size: 18px;
+    background: linear-gradient(135deg, #6ee7ff, #b692ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  nav ul { list-style: none; display: flex; gap: 24px; }
+  nav a {
+    color: #b4b9d1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color .2s;
+  }
+  nav a:hover { color: #6ee7ff; }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 24px 60px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid rgba(110, 231, 255, 0.3);
+    border-radius: 999px;
+    background: rgba(110, 231, 255, 0.08);
+    font-size: 13px;
+    color: #6ee7ff;
+    margin-bottom: 24px;
+  }
+  .badge .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 8px #34d399;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #6ee7ff 50%, #b692ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p.tag {
+    font-size: clamp(16px, 2.4vw, 20px);
+    color: #b4b9d1;
+    max-width: 640px;
+    margin-bottom: 36px;
+  }
+  .cta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: transform .15s, box-shadow .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #6ee7ff, #b692ff);
+    color: #0a0e27;
+    box-shadow: 0 4px 20px rgba(110, 231, 255, 0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(110, 231, 255, 0.5); }
+  .btn-ghost {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e6e9f5;
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); }
+
+  /* Sections */
+  section.block {
+    padding: 80px 0;
+  }
+  h2 {
+    font-size: clamp(24px, 3.5vw, 32px);
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #ffffff, #b4b9d1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .section-sub {
+    color: #8a90ad;
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+
+  /* 卡片网格 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    padding: 24px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    transition: transform .2s, border-color .2s, background .2s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(110, 231, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .card .icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+  .card h3 {
+    font-size: 17px;
+    margin-bottom: 8px;
+    color: #ffffff;
+  }
+  .card p {
+    color: #b4b9d1;
+    font-size: 14px;
+  }
+
+  /* 时间线 */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+    border-left: 2px solid rgba(110, 231, 255, 0.2);
+  }
+  .timeline .item {
+    position: relative;
+    padding-bottom: 28px;
+  }
+  .timeline .item::before {
+    content: "";
+    position: absolute;
+    left: -36px;
+    top: 6px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #6ee7ff;
+    box-shadow: 0 0 12px #6ee7ff;
+  }
+  .timeline .date {
+    font-size: 13px;
+    color: #6ee7ff;
+    margin-bottom: 4px;
+  }
+  .timeline h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .timeline p {
+    color: #b4b9d1;
+    font-size: 14px;
+  }
+
+  /* 状态条 */
+  .status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .chip {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    color: #6ee7b0;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Footer */
+  footer {
+    padding: 40px 24px 60px;
+    text-align: center;
+    color: #6b708a;
+    font-size: 13px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: 40px;
+  }
+  footer a { color: #6ee7ff; text-decoration: none; }
+
+  /* 出场动画 */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
 </head>
 <body>
-    <div class="card">
-        <div class="lock">🔒 HTTPS 安全加密已就绪</div>
-        <h1>🎉 恭喜！dakebubi26.me 成功上线！</h1>
-        <p>这里是我的第一个独立域名个人技术站。</p>
+  <canvas id="particles"></canvas>
+
+  <nav>
+    <div class="nav-inner">
+      <div class="logo">dakebubi26.me</div>
+      <ul>
+        <li><a href="#about">关于</a></li>
+        <li><a href="#skills">技能</a></li>
+        <li><a href="#timeline">动态</a></li>
+        <li><a href="#contact">联系</a></li>
+      </ul>
     </div>
+  </nav>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="badge"><span class="dot"></span> HTTPS 已启用 · 站点运行中</div>
+      <h1>你好，我是 dakebubi26</h1>
+      <p class="tag">这是我的第一个独立域名个人技术站 —— 一个记录学习、折腾与思考的小角落。</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/dakebubi26" target="_blank" rel="noopener">🐙 GitHub 主页</a>
+        <a class="btn btn-ghost" href="#about">了解更多 ↓</a>
+      </div>
+      <div class="status">
+        <span class="chip">✅ DNS 已解析</span>
+        <span class="chip">🔒 HTTPS 加密</span>
+        <span class="chip">⚡ GitHub Pages 部署</span>
+      </div>
+    </section>
+
+    <section class="block reveal" id="about">
+      <h2>关于这个站点</h2>
+      <p class="section-sub">从买域名到上线的第一步</p>
+      <div class="grid">
+        <div class="card">
+          <div class="icon">🌐</div>
+          <h3>独立域名</h3>
+          <p>dakebubi26.me · 真正属于自己的互联网地址</p>
+        </div>
+        <div class="card">
+          <div class="icon">📦</div>
+          <h3>静态托管</h3>
+          <p>基于 GitHub Pages，零成本、零维护</p>
+        </div>
+        <div class="card">
+          <div class="icon">🔐</div>
+          <h3>全站 HTTPS</h3>
+          <p>Let's Encrypt 自动签发，安全可信</p>
+        </div>
+        <div class="card">
+          <div class="icon">🚀</div>
+          <h3>持续迭代</h3>
+          <p>每一次 commit 都是一次小小的成长</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block reveal" id="skills">
+      <h2>正在学习 / 折腾</h2>
+      <p class="section-sub">技术栈是一个不断生长的列表</p>
+      <div class="grid">
+        <div class="card">
+          <div class="icon">💻</div>
+          <h3>前端基础</h3>
+          <p>HTML · CSS · JavaScript</p>
+        </div>
+        <div class="card">
+          <div class="icon">🛠️</div>
+          <h3>工具链</h3>
+          <p>Git · GitHub · VS Code</p>
+        </div>
+        <div class="card">
+          <div class="icon">🌍</div>
+          <h3>域名 & DNS</h3>
+          <p>A 记录 · CNAME · 解析原理</p>
+        </div>
+        <div class="card">
+          <div class="icon">📚</div>
+          <h3>未来计划</h3>
+          <p>Node.js · 数据库 · 一些有趣的小项目</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block reveal" id="timeline">
+      <h2>站点动态</h2>
+      <p class="section-sub">记录每一个小里程碑</p>
+      <div class="timeline">
+        <div class="item">
+          <div class="date">2026-05-26</div>
+          <h4>🎉 站点正式上线</h4>
+          <p>独立域名 dakebubi26.me 解析成功，HTTPS 加密生效</p>
+        </div>
+        <div class="item">
+          <div class="date">2026-05-26</div>
+          <h4>🎨 完成首版主页设计</h4>
+          <p>加入粒子背景动画与响应式布局</p>
+        </div>
+        <div class="item">
+          <div class="date">即将到来</div>
+          <h4>✍️ 第一篇博客</h4>
+          <p>分享从买域名到部署的踩坑笔记</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block reveal" id="contact">
+      <h2>联系我</h2>
+      <p class="section-sub">如果你也喜欢折腾，欢迎来打个招呼</p>
+      <div class="cta" style="justify-content:flex-start;">
+        <a class="btn btn-primary" href="https://github.com/dakebubi26" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn btn-ghost" href="mailto:hi@dakebubi26.me">📧 发邮件</a>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    Made with <span style="color:#ff6b9d;">♥</span> by dakebubi26 · Hosted on
+    <a href="https://github.com/dakebubi26/dakebubi26.github.io" target="_blank" rel="noopener">GitHub Pages</a>
+    · <span id="year"></span>
+  </footer>
+
+<script>
+/* ===== 粒子背景（连线网络） ===== */
+(function() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles;
+  const COUNT = Math.min(120, Math.floor(window.innerWidth / 12));
+  const MAX_DIST = 130;
+  const mouse = { x: -9999, y: -9999 };
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function init() {
+    particles = [];
+    for (let i = 0; i < COUNT; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 1.6 + 0.6
+      });
+    }
+  }
+
+  function step() {
+    ctx.clearRect(0, 0, w, h);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+
+      // 鼠标轻微吸引
+      const dx = mouse.x - p.x;
+      const dy = mouse.y - p.y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < 16000) {
+        p.x += dx * 0.0008;
+        p.y += dy * 0.0008;
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(110, 231, 255, 0.85)';
+      ctx.fill();
+    }
+
+    // 连线
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i], b = particles[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MAX_DIST) {
+          const alpha = (1 - dist / MAX_DIST) * 0.4;
+          ctx.strokeStyle = `rgba(150, 180, 255, ${alpha})`;
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  window.addEventListener('resize', () => { resize(); init(); });
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  window.addEventListener('mouseout', () => { mouse.x = -9999; mouse.y = -9999; });
+
+  resize();
+  init();
+  step();
+})();
+
+/* ===== 滚动出现动画 ===== */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ===== 年份 ===== */
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
